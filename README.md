@@ -22,7 +22,24 @@
 
 ## 📦 Εγκατάσταση
 
-### 1. Clone το repository
-```bash
-git clone https://github.com/το-username-σου/job-search-assistant.git
-cd job-search-assistant
+### 1. Δημιουργία virtual environment
+bash
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+
+### 2.Εγκατάσταση βιβλιοθηκών
+bash
+pip install -r requirements.txt
+
+### 3.Εγκατάσταση browsers για Playwright
+bash
+playwright install chromium
+
+### 4.Δημιουργία αρχείου .env με API keys
+env
+GROQ_API_KEY=gsk_το-groq-key-σου
+
+### 5.🚀 Εκτέλεση
+bash
+streamlit run app.py

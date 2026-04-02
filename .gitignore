@@ -1,0 +1,59 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# API Keys and secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# Data files (too large, personal)
+data/raw_jobs/
+data/processed/
+*.csv
+*.json
+!requirements.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Temporary files
+temp_*.pdf
+temp_*.json
+*.tmp
+
+# Streamlit
+.streamlit/
+
+# Playwright
+test-results/
+playwright-report/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb

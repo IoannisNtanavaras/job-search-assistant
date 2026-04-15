@@ -12,6 +12,7 @@ import time
 import re
 from datetime import datetime
 from typing import List, Dict, Any
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_core.prompts import PromptTemplate
@@ -53,23 +54,33 @@ class JobCollector:
         """
         
         all_jobs=[]
+          
         try:
              
             self.page.goto("https://www.kariera.gr")
             self.page.locator("input[placeholder='e.g. Sales Assistant']").fill(search_term)
             self.page.locator("input[placeholder='e.g. Sales Assistant']").press("Enter")
-            time.sleep(10)
+            time.sleep(5)
+            link_search = self.page.url
             all_buttons =  self.page.get_by_role('button').all()
-            
+
             
             for button in all_buttons:
-                all_jobs.append(button.text_content())
+                soup = BeautifulSoup(button.inner_html(), 'html.parser')
+                links = soup.find_all('a')
+                for link in links:
+                    href = link.get('href')
+                    if href and href.startswith("/jobs/"):
+                        print(href)
+                        all_jobs.append(button.all_text_contents()[0]+ link_search+ href)
+                     
+                
 
             
 
         except Exception as e:
                 print(f"   ⚠️ Σφάλμα κατά το scraping: {e} ")
-            
+        
         return all_jobs
             
         
@@ -80,7 +91,7 @@ class JobCollector:
         """
         prompt = PromptTemplate(
             template="""Από τα παρακάτω περιεχομενο  θα  εξάγεις  πληροφορίες για {search_term}.
-            Το περιοχομενο ειναι χωρισμενο με -- και καθε κομματι περιεχομενου ειναι  πιθανον  μια αγγελια εργασιας.
+            Το περιοχομενο ειναι λιστα με αγγελιες .
 Περιεχομενο:
 {content}
 
@@ -157,7 +168,7 @@ class JobCollector:
         
         content = ""
         for cont in jobs_content :
-            content+=cont +"--"
+            content+=cont +"\n"
         print(content+"AYTO EINAI TO CONTENT")
 
         

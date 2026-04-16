@@ -261,9 +261,9 @@ elif st.session_state.page == "analyze" and st.session_state.jobs_df is not None
         with st.spinner("Αναλύω αγγελίες με Groq AI..."):
             try:
                 analyzer = JobAnalyzer()
-                analyzed = analyzer.analyze_batch(st.session_state.jobs_df.to_dict('records'))
-                st.session_state.jobs_df = analyzed
-                st.session_state.analyzed_results = analyzed
+                analyzed_df = analyzer.analyze_batch_from_links()
+                st.session_state.jobs_df = analyzed_df
+                # st.session_state.analyzed_results = analyzed_df
                 st.success("✅ Ανάλυση ολοκληρώθηκε!")
             except Exception as e:
                 st.error(f"❌ Σφάλμα ανάλυσης: {e}")
@@ -271,23 +271,47 @@ elif st.session_state.page == "analyze" and st.session_state.jobs_df is not None
             st.session_state.analyzing = False
             st.rerun()
 
-    # Εμφάνιση αποτελεσμάτων ανάλυσης
+    # ΕΜΦΑΝΙΣΗ ΑΠΟΤΕΛΕΣΜΑΤΩΝ
     st.subheader("📋 Αποτελέσματα Ανάλυσης")
-    st.dataframe(st.session_state.jobs_df, use_container_width=True)
-
-    # Γράφημα Skills
+    
+    # Επιλογή στηλών για εμφάνιση
+    columns_to_show = ['title', 'company', 'skills', 'experience', 'salary_min', 'salary_max', 'job_type', 'location']
+    available_columns = [col for col in columns_to_show if col in st.session_state.jobs_df.columns]
+    
+    # Μορφοποίηση για καλύτερη εμφάνιση
+    display_df = st.session_state.jobs_df[available_columns].copy()
+    
+    # Μορφοποίηση skills (από string list σε readable)
+    if 'skills' in display_df.columns:
+        display_df['skills'] = display_df['skills'].apply(
+            lambda x: ', '.join(eval(x)) if isinstance(x, str) and x.startswith('[') else str(x)
+        )
+    
+    # Μορφοποίηση μισθών
+    if 'salary_min' in display_df.columns and 'salary_max' in display_df.columns:
+        display_df['salary'] = display_df.apply(
+            lambda x: f"{x['salary_min']} - {x['salary_max']} €" if x['salary_min'] > 0 else "Δεν αναφέρεται",
+            axis=1
+        )
+    
+    st.dataframe(display_df, use_container_width=True)
+    
+    # ============ ΓΡΑΦΗΜΑΤΑ ============
+    st.subheader("📈 Οπτικοποίηση Δεδομένων")
+    
+    # 1. Γράφημα Skills (πιο περιζήτητα)
     if 'skills' in st.session_state.jobs_df.columns:
         all_skills = []
         for skills in st.session_state.jobs_df['skills'].dropna():
-            if isinstance(skills, list):
-                all_skills.extend(skills)
-            elif isinstance(skills, str):
+            if isinstance(skills, str):
                 try:
                     skills_list = eval(skills)
                     if isinstance(skills_list, list):
                         all_skills.extend(skills_list)
                 except:
                     pass
+            elif isinstance(skills, list):
+                all_skills.extend(skills)
         
         if all_skills:
             from collections import Counter
@@ -295,9 +319,39 @@ elif st.session_state.page == "analyze" and st.session_state.jobs_df is not None
             skills_df = pd.DataFrame(skill_counts.most_common(15), columns=['skill', 'count'])
             
             fig = px.bar(skills_df, x='count', y='skill', orientation='h',
-                        title='🔥 Top 15 Skills στις Αγγελίες',
-                        labels={'count': 'Εμφανίσεις', 'skill': 'Skill'})
+                        title='🔥 Top 15 Skills που ζητούνται',
+                        labels={'count': 'Εμφανίσεις', 'skill': 'Skill'},
+                        height=500)
             st.plotly_chart(fig, use_container_width=True)
+    
+    # 2. Γράφημα Εμπειρίας
+    if 'experience' in st.session_state.jobs_df.columns:
+        exp_counts = st.session_state.jobs_df['experience'].value_counts()
+        fig2 = px.pie(values=exp_counts.values, names=exp_counts.index,
+                     title='📊 Κατανομή Επιπέδων Εμπειρίας',
+                     color_discrete_sequence=px.colors.sequential.Blues_r)
+        st.plotly_chart(fig2, use_container_width=True)
+    
+    # 3. Γράφημα Μισθών (αν υπάρχουν)
+    if 'salary_min' in st.session_state.jobs_df.columns and 'salary_max' in st.session_state.jobs_df.columns:
+        salary_data = st.session_state.jobs_df[
+            (st.session_state.jobs_df['salary_min'] > 0) | (st.session_state.jobs_df['salary_max'] > 0)
+        ]
+        if not salary_data.empty:
+            fig3 = px.bar(salary_data, x='title', y=['salary_min', 'salary_max'],
+                         title='💰 Μισθολογικά Ranges',
+                         labels={'value': 'Μισθός (€)', 'variable': 'Τύπος', 'title': 'Θέση'},
+                         barmode='group')
+            st.plotly_chart(fig3, use_container_width=True)
+    
+    # 4. Γράφημα Τύπου Απασχόλησης
+    if 'job_type' in st.session_state.jobs_df.columns:
+        job_type_counts = st.session_state.jobs_df['job_type'].value_counts()
+        if not job_type_counts.empty:
+            fig4 = px.bar(x=job_type_counts.values, y=job_type_counts.index, orientation='h',
+                         title='💼 Τύποι Απασχόλησης',
+                         labels={'x': 'Αριθμός Αγγελιών', 'y': 'Τύπος'})
+            st.plotly_chart(fig4, use_container_width=True)
 
 # ==================== ΣΕΛΙΔΑ MATCHING ====================
 elif st.session_state.page == "match" and st.session_state.jobs_df is not None:

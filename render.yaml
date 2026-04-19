@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: job-search-assistant
+    runtime: python
+    repo: https://github.com/IoannisNtanavaras/job-search-assistant
+    plan: free
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:server

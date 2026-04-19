@@ -28,7 +28,7 @@ class JobCollector:
     
     def __init__(self, playwright: Playwright):
         self.playwright = playwright
-        self.broswer = self.playwright.chromium.launch(headless=False)
+        self.broswer = self.playwright.chromium.launch(headless=True)
         self.context = self.broswer.new_context()
         self.page = self.context.new_page()
         

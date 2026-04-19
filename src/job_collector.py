@@ -16,7 +16,6 @@ from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_core.prompts import PromptTemplate
-from matplotlib.style import context
 from playwright.sync_api import Playwright
 import pandas as pd
 

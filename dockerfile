@@ -1,20 +1,26 @@
-# Χρησιμοποιούμε την επίσημη εικόνα του Playwright που έχει ήδη τα πάντα
-FROM mcr.microsoft.com/playwright/python:v1.49.0-noble
+# 1. Ξεκινάμε από μία εικόνα που περιέχει ήδη τον browser.
+# Αυτή η εικόνα ΔΕΝ θα επιχειρήσει να γίνει root.
+FROM python:3.12-slim
 
-# Ορίζουμε τον φάκελο εργασίας
+# 2. Εγκαθιστούμε τον Chromium browser (σαν κανονικό πακέτο Linux)
+RUN apt-get update && apt-get install -y chromium && rm -rf /var/lib/apt/lists/*
+
+# 3. Ορίζουμε τον φάκελο εργασίας
 WORKDIR /app
 
-# Αντιγράφουμε το requirements.txt
+# 4. Αντιγράφουμε και εγκαθιστούμε τις βιβλιοθήκες Python
 COPY requirements.txt .
-
-# Εγκαθιστούμε τις βιβλιοθήκες Python
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
-# Αντιγράφουμε τον υπόλοιπο κώδικα
+# 5. Αντιγράφουμε τον υπόλοιπο κώδικα
 COPY . .
 
-# Αυτή η γραμμή είναι το "κλειδί": Λέει στο Playwright να ΜΗΝ κατεβάσει browser
+# 6. Λέμε στο Playwright να ΜΗΝ κατεβάσει browser, αλλά να χρησιμοποιήσει τον ήδη εγκατεστημένο
+ENV PLAYWRIGHT_BROWSERS_PATH=/usr/bin
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 
-# Η εντολή για να τρέξει η εφαρμογή
+# 7. Λέμε στο Playwright πού να βρει τον Chromium
+ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
+
+# 8. Η εντολή για να τρέξει η εφαρμογή
 CMD ["streamlit", "run", "app.py", "--server.port", "10000", "--server.address", "0.0.0.0"]

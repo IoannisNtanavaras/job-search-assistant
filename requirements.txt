@@ -1,5 +1,9 @@
 # Web Automation
 playwright>=1.40.0
+libxcb
+libxkbcommon
+libgbm1
+libasound2
 
 # AI & LangChain
 langchain>=0.1.0

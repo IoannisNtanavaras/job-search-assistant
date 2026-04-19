@@ -1,13 +1,9 @@
 services:
   - type: web
     name: job-search-assistant
-    runtime: python
+    runtime: image
     repo: https://github.com/IoannisNtanavaras/job-search-assistant
     plan: free
     envVars:
       - key: GROQ_API_KEY
         sync: false
-      - key: PLAYWRIGHT_BROWSERS_PATH
-        value: /opt/render/project/.cache/playwright
-    buildCommand: pip install -r requirements.txt && playwright install --with-deps chromium
-    startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0

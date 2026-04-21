@@ -48,7 +48,7 @@ class JobCollector:
             self.browser = self.playwright.chromium.launch(headless=True)
 
         
-        self.context = self.broswer.new_context()
+        self.context = self.browser.new_context()
         self.page = self.context.new_page()
         
         

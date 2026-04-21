@@ -1,5 +1,5 @@
-# Web Automation
-playwright>=1.40.0
+# # Web Automation
+# playwright>=1.40.0
 
 # AI & LangChain
 langchain>=0.1.0

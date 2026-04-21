@@ -43,7 +43,7 @@ class JobCollector:
                 executable_path="/usr/bin/chromium"  # ← Πρόσθεσε αυτό
             )
         else:
-            self.browser = self.playwright.chromium.launch(headless=True)
+            self.browser = self.playwright.chromium.launch(headless=False)
 
         
         self.context = self.broswer.new_context()

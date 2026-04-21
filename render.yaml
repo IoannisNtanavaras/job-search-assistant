@@ -1,9 +1,0 @@
-services:
-  - type: web
-    name: job-search-assistant
-    runtime: image
-    repo: https://github.com/IoannisNtanavaras/job-search-assistant
-    plan: free
-    envVars:
-      - key: GROQ_API_KEY
-        sync: false

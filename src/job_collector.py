@@ -8,6 +8,7 @@ job_collector.py - ΣΥΛΛΕΚΤΗΣ ΜΕ FIRECRAWL SEARCH + GROQ
 
 import os
 import json
+import sys
 import time
 import re
 from datetime import datetime
@@ -21,6 +22,11 @@ import pandas as pd
 
 load_dotenv()
 
+# Streamlit Cloud: Βρες τον σωστό browser
+if sys.platform == "linux":
+    os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "/home/appuser/.cache/ms-playwright"
+    os.environ["PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD"] = "1"
+
 class JobCollector:
     """
     Συλλέκτης  για εύρεση αγγελιών
@@ -28,7 +34,18 @@ class JobCollector:
     
     def __init__(self, playwright: Playwright):
         self.playwright = playwright
-        self.broswer = self.playwright.chromium.launch(headless=True)
+
+        # Για Streamlit Cloud: chrome/chromium path
+        import sys
+        if sys.platform == "linux":
+            self.browser = self.playwright.chromium.launch(
+                headless=True,
+                executable_path="/usr/bin/chromium"  # ← Πρόσθεσε αυτό
+            )
+        else:
+            self.browser = self.playwright.chromium.launch(headless=True)
+
+        
         self.context = self.broswer.new_context()
         self.page = self.context.new_page()
         

@@ -22,26 +22,11 @@ import pandas as pd
 
 load_dotenv()
 
-# Εύρεση του σωστού browser path στο Streamlit Cloud
+# Streamlit Cloud: Απλό path για chromium
 if sys.platform == "linux":
-    # Streamlit Cloud paths
-    possible_paths = [
-        "/usr/bin/chromium",
-        "/usr/bin/chromium-browser",
-        "/home/appuser/.cache/ms-playwright/chromium-*/chrome-linux/chrome",
-    ]
-    
-    chrome_path = None
-    for path in possible_paths:
-        import glob
-        matches = glob.glob(path)
-        if matches:
-            chrome_path = matches[0]
-            break
-    
-    if chrome_path:
-        os.environ["PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH"] = chrome_path
-        os.environ["PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD"] = "1"
+    os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "/usr/bin"
+    os.environ["PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD"] = "1"
+    os.environ["PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH"] = "/usr/bin/chromium"
 
 class JobCollector:
     """

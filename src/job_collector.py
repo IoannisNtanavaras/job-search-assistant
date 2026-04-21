@@ -22,10 +22,26 @@ import pandas as pd
 
 load_dotenv()
 
-# Streamlit Cloud: Βρες τον σωστό browser
+# Εύρεση του σωστού browser path στο Streamlit Cloud
 if sys.platform == "linux":
-    os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "/home/appuser/.cache/ms-playwright"
-    os.environ["PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD"] = "1"
+    # Streamlit Cloud paths
+    possible_paths = [
+        "/usr/bin/chromium",
+        "/usr/bin/chromium-browser",
+        "/home/appuser/.cache/ms-playwright/chromium-*/chrome-linux/chrome",
+    ]
+    
+    chrome_path = None
+    for path in possible_paths:
+        import glob
+        matches = glob.glob(path)
+        if matches:
+            chrome_path = matches[0]
+            break
+    
+    if chrome_path:
+        os.environ["PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH"] = chrome_path
+        os.environ["PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD"] = "1"
 
 class JobCollector:
     """
@@ -35,15 +51,16 @@ class JobCollector:
     def __init__(self, playwright: Playwright):
         self.playwright = playwright
 
-        # Για Streamlit Cloud: chrome/chromium path
-        import sys
-        if sys.platform == "linux":
+        # Streamlit Cloud: βρες τον browser
+        chrome_path = os.environ.get("PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH")
+        
+        if chrome_path:
             self.browser = self.playwright.chromium.launch(
                 headless=True,
-                executable_path="/usr/bin/chromium"  # ← Πρόσθεσε αυτό
+                executable_path=chrome_path
             )
         else:
-            self.browser = self.playwright.chromium.launch(headless=False)
+            self.browser = self.playwright.chromium.launch(headless=True)
 
         
         self.context = self.broswer.new_context()
